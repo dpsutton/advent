@@ -3,10 +3,6 @@
             [clojure.test :refer [deftest is testing are]]
             [advent.day5data :as data]))
 
-(defn instruction [machine register]
-  (let [value (get machine register ::escape)]
-    [(update machine register inc) value]))
-
 (defn run-machine [incrementer machine]
   (loop [machine    machine
          register   1
