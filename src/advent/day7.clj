@@ -75,6 +75,71 @@
            :current-size            current-size})
         (recur distinct-edge)))))
 
+(defn imbalanced-child
+  [adjacency {:keys [state]}]
+  (let [{:keys [weight edges]} (adjacency state)
+        weights                (map (partial node-weight adjacency) edges)
+        unique                 (->> (reduce (fn [acc [edge weight]]
+                                              (update acc weight (fnil conj []) edge))
+                                            {}
+                                            (map vector edges weights))
+                                    (some (fn [[size nodes]]
+                                            (when (= (count nodes) 1)
+                                              (first nodes)))))]
+    (when unique
+      (let [total-weight           (node-weight adjacency unique)
+            total-expected         (node-weight adjacency (first (remove #{unique} edges)))
+            diff                   (- total-expected total-weight)
+            size                   (:weight (adjacency unique))]
+        {:state     unique
+         :size      size
+         :should-be (+ size diff)}))))
+
+(defn imbalanced-child'
+  [adjacency state]
+  (let [{:keys [weight edges]} (adjacency state)
+        weights                (map (partial node-weight adjacency) edges)
+        unique                 (->> (reduce (fn [acc [edge weight]]
+                                              (update acc weight (fnil conj []) edge))
+                                            {}
+                                            (map vector edges weights))
+                                    (some (fn [[size nodes]]
+                                            (when (= (count nodes) 1)
+                                              (first nodes)))))]
+    unique))
+
+(defn imbalanced-states
+  [adjacency]
+  (iterate (partial imbalanced-child adjacency) {:state (no-incoming-edges adjacency)}))
+
+(defn imbalanced-states'
+  [adjacency]
+  (iterate (partial imbalanced-child' adjacency) (no-incoming-edges adjacency)))
+
+(defn solve2'
+  "We can remember the imbalance as we go and just keep taking states while there is an imbalance"
+  ([] (solve2' data/data))
+  ([adjacency] (->> adjacency imbalanced-states (take-while some?) last :should-be)))
+
+(defn solve2''
+  "or we can look for the imbalance at the toplevel. since there is only
+  one malformed state, the entire observed imbalance is at that site"
+  ([] (solve2'' data/data))
+  ([adjacency] (let [state           (last (take-while some? (imbalanced-states' adjacency)))
+                     {:keys [edges]} (adjacency (no-incoming-edges adjacency))
+                     diff            (let [weights  (map (partial node-weight adjacency) edges)
+                                           c        (count weights)
+                                           d        (distinct weights)
+                                           sum      (apply + weights)
+                                           without  (/ (- sum (apply + d))
+                                                       (- c 2))
+                                           standout (first (remove #{without} d))]
+                                       (- without standout))
+                     size            (:weight (adjacency state))]
+                 (+ size diff))))
+
 (defn solve2
+  "Or we can walk down a little more explicitly and compute things as we go"
   ([] (solve2 data/data))
-  ([adjacency] ))
+  ([adjacency] (:correct-size (unbalanced-parent-balanced-children adjacency
+                                                                   (no-incoming-edges adjacency)))))
