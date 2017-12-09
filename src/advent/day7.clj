@@ -18,34 +18,26 @@
   ([] (solve1 data/data))
   ([graph] (no-incoming-edges adjacency)))
 
-(defn node-weight [cache adjacency node-name]
-  (if-let [weight (cache node-name)]
-    {:cache cache :weight weight}
-    (let [{:keys [edges weight]} (adjacency node-name)
-          caches-and-weights     (map (partial node-weight cache adjacency) edges)
-          [cache sum] (reduce (fn [[cache weight] {c :cache w :weight}] [(merge cache c) (+ weight w)])
-                              [cache weight]
-                              caches-and-weights)]
-      {:cache (assoc cache node-name sum) :weight sum})))
+(defn node-weight [adjacency node-name]
+  (let [{:keys [edges weight]} (adjacency node-name)
+        weights     (map (partial node-weight adjacency) edges)]
+    (apply + weight weights)))
 
 (defn equal-weights? [weights]
   (if (seq weights)
     (apply = weights)
     true))
 
-(defn balanced? [cache adjacency node-name]
+(defn balanced? [adjacency node-name]
   (let [{:keys [edges]} (adjacency node-name)]
-    (equal-weights? (map (partial node-weight cache adjacency) edges))))
+    (equal-weights? (map (partial node-weight adjacency) edges))))
 
 (deftest node-weight-tests
   (let [adjacency data/sample]
-    (are [node weight] (= (:weight (node-weight {} adjacency node)) weight)
+    (are [node weight] (= (node-weight adjacency node) weight)
       :ugml 251
       :padx 243
       :fwft 243)))
-
-(defn looking-for [cache adjacency node-name]
-  (let [{:keys [edges weight]}]))
 
 (deftest balanced?-tests
   (let [adjacency data/sample]
@@ -57,29 +49,31 @@
 
 (defn unbalanced-parent-balanced-children
   [adjacency root]
-  (let [{:keys [cache]} (node-weight {} adjacency root)]
-    (loop [parent        nil
-           current       root
-           parent-weight 0]
-      (let [{:keys [weight edges]} (adjacency current)
-            partitions             (->> edges
-                                        (map (fn [kid] [(cache kid) kid]))
-                                        (group-by first))
-            [size distinct-edge]          (->> partitions
-                                        (filter (fn [[p-size nodes]] (= 1 (count nodes))))
-                                        first
-                                        second
-                                        first)]
-        (if (balanced? cache adjacency distinct-edge)
-          {:bad-edge current
-           :good-edge-below distinct-edge
-           :parent parent
-           :other-partition-sizes (->> partitions
-                                       (filter (fn [[p-size nodes]] (not= 1 (count nodes))))
-                                       first
-                                       first)
-           :bad-size size}
-          (recur current distinct-edge weight))))))
+  (loop [current root]
+    (let [{:keys [weight edges]} (adjacency current)
+          partitions             (->> edges
+                                      (map (fn [kid] [(node-weight adjacency kid) kid]))
+                                      (group-by first))
+          [size distinct-edge]   (->> partitions
+                                      (filter (fn [[p-size nodes]] (= 1 (count nodes))))
+                                      first
+                                      second
+                                      first)]
+      ;; we're looking for the first balanced node after a chain of
+      ;; unbalanced nodes. We need to stay look down because we need
+      ;; that node's siblings to know how far to adjust it.
+      (if (balanced? adjacency distinct-edge)
+        (let [correct-total-size (->> partitions
+                                      (filter (fn [[p-size nodes]] (not= 1 (count nodes))))
+                                      first
+                                      first)
+              current-size       (:weight (adjacency distinct-edge))]
+          {:last-bad-node           current
+           :node-needing-adjustment distinct-edge
+           :correct-size            (+ current-size
+                                       (- correct-total-size size))
+           :current-size            current-size})
+        (recur distinct-edge)))))
 
 (defn solve2
   ([] (solve2 data/data))
