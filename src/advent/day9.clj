@@ -52,15 +52,18 @@
        (assoc :nesting level)
        (update :groups (fn [groups] (mapv (partial annotate-tree (inc level)) groups))))))
 
-(defn score-tree [tree]
-  (apply + (:nesting tree) (map score-tree (:groups tree)) ))
+(defn walk-tree [node-fn tree]
+  (apply + (node-fn tree) (map (partial walk-tree node-fn) (:groups tree))))
 
+(defn score-tree [tree]
+  (walk-tree (fn [node] (:nesting node)) tree))
 (defn count-garbage [tree]
-  (apply +
-         (if (seq (:garbage tree))
-           (apply + (map (fn [g] (- (count g) 2)) (:garbage tree)))
-           0)
-         (map count-garbage (:groups tree))))
+  (walk-tree (fn [node]
+               (let [garbage (:garbage node)]
+                 (if (seq garbage)
+                   (apply + (map (fn [g] (- (count g) 2)) garbage))
+                   0)))
+             tree))
 
 ;; strip garbage from tree if you like
 (defn cleanse-string [full-input]
