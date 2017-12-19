@@ -1,6 +1,6 @@
-(ns advent.day8
+(ns advent.day08
   (:require [clojure.string :as str]
-            [advent.day8data :as data]))
+            [advent.day08data :as data]))
 
 (defn target-register [statement] (first statement))
 

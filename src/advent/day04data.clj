@@ -1,4 +1,4 @@
-(ns advent.day4data)
+(ns advent.day04data)
 
 (def data ["nyot babgr babgr kqtu kqtu kzshonp ylyk psqk"
            "iix ewj rojvbkk phrij iix zuajnk tadv givslju ewj bda"

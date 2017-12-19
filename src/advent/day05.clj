@@ -1,7 +1,7 @@
-(ns advent.day5
+(ns advent.day05
   (:require [clojure.string :as str]
             [clojure.test :refer [deftest is testing are]]
-            [advent.day5data :as data]))
+            [advent.day05data :as data]))
 
 (defn run-machine [incrementer machine]
   (loop [machine    machine

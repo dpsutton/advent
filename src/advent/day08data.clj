@@ -1,4 +1,4 @@
-(ns advent.day8data
+(ns advent.day08data
   (:require [clojure.string :as str]))
 
 (def sample-text

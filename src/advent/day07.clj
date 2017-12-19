@@ -1,7 +1,7 @@
-(ns advent.day7
+(ns advent.day07
   (:require [clojure.string :as str]
             [clojure.set :as set]
-            [advent.day7data :as data]
+            [advent.day07data :as data]
             [clojure.test :refer [testing deftest are is]]))
 
 

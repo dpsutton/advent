@@ -1,4 +1,4 @@
-(ns advent.day1
+(ns advent.day01
   (:require [clojure.test :refer [deftest is testing are]]))
 
 (defn digit->seq

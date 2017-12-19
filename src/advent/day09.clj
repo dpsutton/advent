@@ -1,6 +1,6 @@
-(ns advent.day9
+(ns advent.day09
   (:require [clojure.string :as str]
-            [advent.day9data :as data]))
+            [advent.day09data :as data]))
 
 (defn read-garbage [full-input]
   (loop [input full-input

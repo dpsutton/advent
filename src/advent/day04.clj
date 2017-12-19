@@ -1,7 +1,7 @@
-(ns advent.day4
+(ns advent.day04
   (:require [clojure.string :as str]
             [clojure.test :refer [deftest is testing are]]
-            [advent.day4data :as data]))
+            [advent.day04data :as data]))
 
 (defn are-unique? [things]
   (->> things frequencies vals (every? #{1})))

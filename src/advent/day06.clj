@@ -1,5 +1,5 @@
-(ns advent.day6
-  (:require [advent.day6data :as data]))
+(ns advent.day06
+  (:require [advent.day06data :as data]))
 
 (defn sieve [s]
   (cons (first s)

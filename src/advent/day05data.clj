@@ -1,4 +1,4 @@
-(ns advent.day5data)
+(ns advent.day05data)
 (def registers
   [0
    1
