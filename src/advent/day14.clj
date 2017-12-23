@@ -54,19 +54,20 @@
   (apply merge (map hash->grid-row (range) (hashes input))))
 
 (defn neighbors [[x y]]
-  (set [           [x (dec y)]
-        [(dec x) y]           [(inc x) y]
-                   [x (inc y)]           ]))
+  [           [x (dec y)]
+   [(dec x) y]           [(inc x) y]
+              [x (inc y)]           ])
 
 (defn find-contiguous [cell grid']
   (loop [grid grid'
          group #{}
          cells #{cell}]
     (if-let [cell (first cells)]
-      (let [neighbors (neighbors cell)
-            neighbors (set (filter (fn [n] (contains? grid n)) neighbors))]
+      (let [neighbors (->> (neighbors cell)
+                           (filter (partial contains? grid))
+                           set)]
         (recur (apply dissoc grid cell neighbors)
-               (set/union (set/union group #{cell}) neighbors)
+               (conj group cell)
                (-> cells
                    (set/union neighbors)
                    (set/difference #{cell}))))
