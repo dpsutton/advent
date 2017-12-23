@@ -57,7 +57,7 @@
   (time (solve2))
   ;; "Elapsed time: 10507.820736 msecs"
   ;; 3870382
-  (dotimes [_ 20] (time (sieve-method data/data)))
+  (time (sieve-method data/data))
   ;; "Elapsed time: 1293.195798 msecs"
   ;; 3870382
   )
