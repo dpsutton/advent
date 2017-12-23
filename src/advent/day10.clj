@@ -59,3 +59,6 @@
          (recenter transforms)
          dense-hash
          dense-hash->str))))
+
+(defn knot-hash [input]
+  (solve2 input))
