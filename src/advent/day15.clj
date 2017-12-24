@@ -21,7 +21,7 @@
   (fn [x]
     (= 0 (mod x n))))
 
-(defn generations [factor seed multiples-of]
+(defn generations [{:keys [factor seed multiples-of]}]
   (let [matching? (multiple-of multiples-of)]
     (->> seed
          (iterate (fn [previous]
@@ -46,20 +46,14 @@
 
 (defn solve
   [g1 g2 iterations]
-  (let [{seed-a         :seed
-         factor-a       :factor
-         multiples-of-a :multiples-of} g1
-        {seed-b         :seed
-         factor-b       :factor
-         multiples-of-b :multiples-of} g2]
-    (reduce (fn [match-count [gen1 gen2]]
-              (if (match? gen1 gen2)
-                (inc match-count)
-                match-count))
-            0
-            (map vector
-                 (take iterations (generations factor-a seed-a multiples-of-a))
-                 (take iterations (generations factor-b seed-b multiples-of-b))))))
+  (reduce (fn [match-count [gen1 gen2]]
+            (if (match? gen1 gen2)
+              (inc match-count)
+              match-count))
+          0
+          (map vector
+               (take iterations (generations g1))
+               (take iterations (generations g2)))))
 
 (defn solve1
   ([] (solve1 generator-a generator-b (* 40 million)))
