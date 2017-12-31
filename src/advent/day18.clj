@@ -48,10 +48,6 @@
    (let [{:keys [machine]} (eval-loop instructions 0 short-circuit-fn)]
      (:recovered machine))))
 
-(comment
-  (= 3423 (solve1))
-  )
-
 (defn arg-value [machine optional-arg]
   (cond (nil? optional-arg) nil
         (number? optional-arg) optional-arg
@@ -66,8 +62,8 @@
       mul (update machine reg (fnil * 0) arg)
       mod (update machine reg (fnil mod 0) arg)
       snd (-> machine
-              (update :send #(conj % (or (machine reg)
-                                         reg)))
+              (update :send #((fnil conj []) % (or (machine reg)
+                                                   reg)))
               (update :send-count (fnil inc 0)))
       rcv (if-let [v (first (:received machine))]
             (-> machine
@@ -85,20 +81,19 @@
       (let [new-machine (regeval-channels machine next-ins)
             waiting?    (:waiting? new-machine)]
         (cond
-          waiting? [(assoc machine-info
-                           :machine (dissoc new-machine :waiting?)
-                           :instruction instruction ;; rerun same rcv instruction
-                           :waiting? true) (:received new-machine)]
+          waiting? (assoc machine-info
+                          :machine (dissoc new-machine :waiting?)
+                          :instruction instruction ;; rerun same rcv instruction
+                          :waiting? true)
           :else
           (recur (dissoc new-machine :jump)
                  (if-let [jump (:jump new-machine)]
                    (+ jump instruction)
                    (inc instruction)))))
-      [(-> machine-info
-           (assoc :machine machine)
-           (assoc :finished? true)
-           (assoc :waiting? false))
-       (:received machine)])))
+      (-> machine-info
+          (assoc :machine machine)
+          (assoc :finished? true)
+          (assoc :waiting? false)))))
 
 (defn new-machine [n pid]
   {:machine     {'p          pid
@@ -109,25 +104,42 @@
    :name        n
    :finished?   false})
 
-(defn eval-loop-channels [instructions]
-  (let [compute' (partial compute instructions)]
-    (loop [m-a           (new-machine 'a 0)
-           m-b           (new-machine 'b 1)
-           iters         0]
-      (let [pending-queue (-> m-b :machine :send)
-            ;; inter process communication. take one's send queue and
-            ;; mount as the received queue in the other machine. this
-            ;; is modified in the original so then replace afterwards
-            ;; minus the values it has consumed
-            compute-info (assoc-in m-a [:machine :received] pending-queue)
-            [new-m-a new-pending-queue] (compute' compute-info)
-            m-b (assoc-in m-b [:machine :send] new-pending-queue)]
-        (cond
-          ;; deadlock m-a is in a state that it cannot continue
-          (or (:finished? m-b)
-              (and (:waiting? m-b)
-                   (empty? (-> new-m-a :machine :send))))
-          [new-m-a m-b]
+(defn stopped? [[m-a m-b]]
+  ;; convention is that machine-b has just run so it is either waiting
+  ;; or finished. so stopped if the next machine to run is finished or
+  ;; if it is waiting and the machine that just ran has nothing to
+  ;; send.
+  (or (:finished? m-a)
+      (and (:waiting? m-a)
+           (empty? (-> m-b :machine :send)))))
 
-          :else
-          (recur m-b new-m-a (inc iters)))))))
+(defn eval-loop-channels [instructions]
+  (fn [[m-a m-b]]
+    (let [pending-queue (-> m-b :machine :send)
+          ;; we can clear the send queue. because the other process
+          ;; will either consume all values or get into a state
+          ;; where it can no longer consumer values
+          m-b (assoc-in m-b [:machine :send] [])
+          compute-info (assoc-in m-a [:machine :received] pending-queue)
+          new-m-a (compute instructions compute-info)]
+      [m-b new-m-a])))
+
+(defn solve2
+  ([] (solve2 data/data))
+  ([instructions]
+   (let [program-states (iterate (eval-loop-channels instructions) [(new-machine 'a 0) (new-machine 'b 1)])]
+     (->> program-states
+          (filter stopped?)
+          first
+          (some (fn [machine]
+                  (when (= (:name machine) 'b)
+                    machine)))
+          :machine
+          :send-count))))
+
+(comment
+  (= 3423 (solve1))
+  (= 7493 (solve2))
+  )
+
+
