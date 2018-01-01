@@ -97,5 +97,19 @@
   ;; 657 657 657 657) and it appears that 657 is an answer accepted by
   ;; aoc. but this is by no means conclusive.
 
+  (let [states (particle-states data)]
+    (map minimum-distance (take 80 states)))
+  
+  ;; (65 73 77 85 53 88 88 42 30 20 84 70 52 96 48 68 48 66 145 68 46
+  ;; 112 140 92 63 112 103 105 63 84 36 43 116 79 17 56 59 48 73 129
+  ;; 260 59 116 152 219 335 448 409 393 403 394 362 169 389 390 735
+  ;; 944 926 907 998 815 626 431 768 1131 1125 959 990 1412 1478 1456
+  ;; 1668 1787 2013 2038 2063 2088 2113 2138 2191)
+
+  ;; we see that the minimum distance between points is growing giving
+  ;; us confidence that the particles have come to have acceleration
+  ;; dominate and the collisions that will happen have already
+  ;; happened.
+
   (= (solve2) 657)
   )
