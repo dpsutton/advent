@@ -1,0 +1,13 @@
+**/target
+**/classes
+**/checkouts
+**/.cpcache
+pom.xml
+pom.xml.asc
+.lein-repl-history
+*.jar
+*.class
+/.lein-*
+**/.nrepl-port
+.hgignore
+.hg/
