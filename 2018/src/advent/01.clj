@@ -27,7 +27,9 @@
 
 (defn solve2
   ([] (solve2 (map parse-line (load-data! "src/advent/01.data"))))
-  ([op&values]
-   (let [values (cycle op&values)
-         sums   (drop 1 (reductions + 0 values))]
-     (first-duplicate sums))))
+  ([values]
+   (->> values
+        cycle
+        (reductions + 0)
+        (drop 1)
+        first-duplicate)))
