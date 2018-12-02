@@ -61,3 +61,22 @@
           (filter #(apply single-difference? %))
           first
           without-discrepancy))))
+
+(defn without-index [n s]
+  (str (subs s 0 n)
+       (subs s (inc n) (count s))))
+
+(defn first-duplicate
+  ([xs] (first-duplicate xs #{}))
+  ([[x & xs] seen]
+   (when x
+     (if (seen x)
+       x
+       (recur xs (conj seen x))))))
+
+(defn solve2'
+  ([] (solve2' @data))
+  ([input]
+   (some first-duplicate
+         (map (fn [n] (map (partial without-index n) input))
+              (range)))))
