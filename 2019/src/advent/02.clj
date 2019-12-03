@@ -1,6 +1,8 @@
 (ns advent.02
   (:require
    [clojure.java.io :as io]
+   [clojure.core.logic :as l :refer [fresh run* run]]
+   [clojure.core.logic.fd :as fd]
    [clojure.string :as str]))
 
 (def input
@@ -35,6 +37,17 @@
   ([instructions noun verb]
    (solve-1 (assoc instructions 1 noun 2 verb))))
 
+(comment
+
+  (run 2 [x y]
+    (fresh [x' y' z']
+      (fd/in x y (fd/interval 1 100))
+      (fd/* 384000 x x')
+      (fd/* 1 y y')
+      (fd/+ x' y' z')
+      (fd/+ z' 106699 19690720)))
+;; => ([51 21])
+  )
 (defn solve-2
   []
   (let [coarse (- (run-with @input 2 1) (run-with @input 1 1))
