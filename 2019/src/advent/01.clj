@@ -1,10 +1,10 @@
 (ns advent.01
-  (:require [clojure.java.io :as io]))
+  (:require
+   [advent.utils :as utils]))
 
 (def data-1
   (delay
-    (with-open [rdr (io/reader "resources/01.txt")]
-      (mapv #(Long/parseLong %) (line-seq rdr)))))
+    (mapv #(Long/parseLong %) (utils/input "01"))))
 
 (defn mass->fuel [mass]
   (-> mass (/ 3) (Math/floor) (- 2) long))

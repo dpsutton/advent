@@ -1,6 +1,6 @@
 (ns advent.02
   (:require
-   [clojure.java.io :as io]
+   [advent.utils :as utils]
    [clojure.core.logic :as l :refer [fresh run* run]]
    [clojure.core.logic.fd :as fd]
    [clojure.string :as str]))
@@ -9,8 +9,7 @@
   (let [f #(->> (str/split % #",")
                 (map (fn [x] (Long/parseLong x))))]
     (delay
-      (with-open [in (io/reader "resources/02.txt")]
-        (into [] (mapcat f (line-seq in)))))))
+      (into [] (mapcat f (utils/input "02"))))))
 
 (defn interpret
   [instructions]
@@ -58,6 +57,7 @@
       [noun verb])))
 
 (comment
+
   (interpret [1,9,10,3,2,3,11,0,99,30,40,50])
   (interpret [1,0,0,0,99])
   (interpret [2,3,0,3,99])
