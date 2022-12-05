@@ -5,6 +5,7 @@
 
 (def problem-input (slurp "src/day02.txt"))
 
+#_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
 (def sample-input "A Y
 B X
 C Z
@@ -62,6 +63,7 @@ C Z
   (solve-b)
   )
 
+#_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
 (defn solve [{:keys [input]}]
   (let [input (if input (slurp input) problem-input)]
     (time (println (solve-a input)))
