@@ -29,8 +29,7 @@
                            (nth ns i')))
                  (range (count ns))))]
     (or (safe? level)
-        (some true? (for [sublist (without level)]
-                      (safe? sublist))))))
+        (some safe? (without level)))))
 
 (defn parse-line [l] (map parse-long (str/split l #"\s+")))
 
@@ -47,8 +46,7 @@
               + 0 (str/split-lines txt))))
 
 (defn solve [{:keys [input]}]
-  (let [input (or (when input (slurp input))
-                  problem-input)]
+  (let [input (if input (slurp input) problem-input)]
     (time (println (solve-a input)))
     (time (println (solve-b input)))))
 
